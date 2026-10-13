@@ -1,0 +1,17 @@
+schema: spec-driven
+
+context: |
+  Tech stack: TypeScript, Cloudflare Workers, Hono, Cloudflare D1 (SQLite), Wrangler.
+  Architecture:
+  - Framework: Hono server on Cloudflare Workers
+  - Persistence: Cloudflare D1 SQLite database, managed via Wrangler migrations
+  - UI: Server-rendered HTML using hono/html with classic HTML form POST (page reload), plain HTML for 404 pages
+  - URL shortening: nanoid-generated short codes (e.g., 6-8 chars) with 3 retry attempts on collision
+  - Redirection: HTTP 302 Found redirects to avoid client caching and ensure click counts are accurately incremented
+  - Validation: Server-side validation rejecting invalid or non-http(s) URLs with error messages rendered in UI
+
+rules:
+  proposal:
+    - Keep proposals clear and structured with problem, proposed solution, and non-goals
+  tasks:
+    - Group tasks logically by infrastructure/setup, database, server/routes, and UI
