@@ -1,0 +1,19 @@
+{
+  "name": "url-shortener",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "hono": "^4.13.13",
+    "nanoid": "^6.0.2"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261013.1",
+    "typescript": "^6.0.3",
+    "wrangler": "^4.150.0"
+  },
+  "private": true
+}

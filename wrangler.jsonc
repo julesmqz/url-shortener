@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "url-shortener",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-01-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "url-shortener-db",
+      "database_id": "url-shortener-db",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
