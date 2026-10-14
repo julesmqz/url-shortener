@@ -4,7 +4,9 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "dev": "wrangler dev",
+    "migrate:local": "wrangler d1 migrations apply DB --local"
   },
   "dependencies": {
     "hono": "^4.13.13",
