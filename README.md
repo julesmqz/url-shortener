@@ -145,3 +145,9 @@ curl -i http://localhost:8787/links/<short_code>/analytics
 - **ID Generation**: [nanoid](https://github.com/ai/nanoid) (custom Base62 alphabet)
 - **Language**: TypeScript
 - **Tooling**: Wrangler CLI, OpenSpec
+
+## MY ADDED FEATURE
+
+I decided to add extended analytics since cloudflare has a lot of data already collected that can serve us for new
+features in the future after analysis and consideration. Also, it seems like a quick win since the implementation
+was not too complex. 
