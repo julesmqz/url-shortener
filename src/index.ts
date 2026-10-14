@@ -1,7 +1,8 @@
 import { Hono } from 'hono';
 import { validateUrl } from './validation';
-import { createShortLink, getAllLinks, incrementClickAndGet } from './db';
-import { renderDashboard, renderNotFoundPage } from './views';
+import { createShortLink, getAllLinks, getLinkByCode, recordClickDetail, getLinkAnalytics } from './db';
+import { renderDashboard, renderNotFoundPage, renderAnalyticsPage } from './views';
+import { parseRefererSource, detectBot } from './analytics';
 
 type Bindings = {
   DB: D1Database;
@@ -62,7 +63,20 @@ app.post('/links', async (c) => {
   }
 });
 
-// 3. Redirection: Increment click counter and issue HTTP 302
+// 3. Analytics view for a specific short link
+app.get('/links/:code/analytics', async (c) => {
+  const code = c.req.param('code');
+
+  const analytics = await getLinkAnalytics(c.env.DB, code);
+  if (!analytics) {
+    return c.html(renderNotFoundPage(code), 404);
+  }
+
+  const origin = new URL(c.req.url).origin;
+  return c.html(renderAnalyticsPage({ analytics, origin }));
+});
+
+// 4. Redirection: Async telemetry ingestion and HTTP 302 redirect
 app.get('/:code', async (c) => {
   const code = c.req.param('code');
 
@@ -71,15 +85,40 @@ app.get('/:code', async (c) => {
     return c.notFound();
   }
 
-  const link = await incrementClickAndGet(c.env.DB, code);
+  const link = await getLinkByCode(c.env.DB, code);
   if (!link) {
     return c.html(renderNotFoundPage(code), 404);
   }
 
+  // Extract edge telemetry and headers
+  const cf = c.req.raw.cf as (IncomingRequestCfProperties & { botManagement?: { verifiedBot?: boolean } }) | undefined;
+  const country = cf?.country ? String(cf.country) : (c.req.header('cf-ipcountry') || 'Unknown');
+  const city = typeof cf?.city === 'string' && cf.city !== '' ? cf.city : 'Unknown';
+  const referer = c.req.header('referer') || null;
+  const refererSource = parseRefererSource(referer);
+  const userAgent = c.req.header('user-agent') || null;
+  const { isBot, botName } = detectBot(cf, userAgent);
+
+  // Schedule non-blocking persistence in Worker background execution context
+  c.executionCtx.waitUntil(
+    recordClickDetail(c.env.DB, {
+      linkId: link.id,
+      country,
+      city,
+      referer,
+      refererSource,
+      isBot: isBot ? 1 : 0,
+      botName,
+    }).catch((err) => {
+      console.error('Failed to record click analytics in background:', err);
+    })
+  );
+
+  // Immediate 302 redirect response
   return c.redirect(link.original_url, 302);
 });
 
-// 4. Custom plain HTML 404 handler for any other unhandled route
+// 5. Custom plain HTML 404 handler for any other unhandled route
 app.notFound((c) => {
   return c.html(renderNotFoundPage(), 404);
 });
