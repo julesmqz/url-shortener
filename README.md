@@ -151,3 +151,10 @@ curl -i http://localhost:8787/links/<short_code>/analytics
 I decided to add extended analytics since cloudflare has a lot of data already collected that can serve us for new
 features in the future after analysis and consideration. Also, it seems like a quick win since the implementation
 was not too complex. 
+
+## What to do next with more time
+
+Implement a testing suite for unit tests.
+Implement a pipeline for CI/CD.
+Fixed a bug where refreshing main screen after shorten a link caused to duplicate it.
+Analyzed the data collected to identify potential areas for improvement and new features.
